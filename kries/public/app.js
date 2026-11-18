@@ -34,7 +34,7 @@ function instructions(){
 }
 function loadAttempt(a){
  clearInterval(timer);attempt=a;offset=a.serverTime*1000-Date.now();saveFailed=false;submitting=false;
- if(a.ended!==null){result();return}examView();tick();timer=setInterval(tick,1000);
+ if(a.ended!==null){modal.close();result();window.scrollTo(0,0);return}examView();tick();timer=setInterval(tick,1000);
 }
 function tick(){
  if(!attempt||attempt.ended!==null)return;
@@ -52,9 +52,23 @@ function save(){
  a.revision=reply.revision;if(seq===version){saveFailed=false;status('Saved')}
  }).catch(e=>{saveFailed=true;status(e.message+' · Use Retry save below.');});return saves;
 }
+function paletteContent(a){
+ const n=Object.keys(a.answers).length;
+ return '<p class="muted">'+n+' answered · '+(100-n)+' remaining · '+a.flags.length+' flagged</p><div class="palette">'+a.questions.map((_,k)=>'<button aria-label="Question '+(k+1)+(k in a.answers?', answered':'')+(a.flags.includes(k)?', marked for review':'')+'" class="'+(k in a.answers?'answered ':'')+(k===a.position?'here ':'')+(a.flags.includes(k)?'marked':'')+'" data-act="go/'+k+'">'+(k+1)+'</button>').join('')+'</div><div class="actions">'+button('Submit test','confirm','light')+button('Retry save','save','ghost')+button('Save & exit','exit','ghost')+'</div>';
+}
+function showPalette(){
+ modal.classList.add('question-sheet');
+ modal.innerHTML='<div class="row sheet-heading"><h2 id="sheet-title">Question palette</h2>'+button('Close','close','light')+'</div>'+paletteContent(attempt);
+ modal.setAttribute('aria-labelledby','sheet-title');
+ modal.showModal();
+}
+modal.addEventListener('close',()=>{
+ modal.classList.remove('question-sheet');
+ modal.removeAttribute('aria-labelledby');
+});
 function examView(){
- const a=attempt,i=a.position,q=a.questions[i],n=Object.keys(a.answers).length;
- app.innerHTML='<div class="row"><div><span class="eyebrow">Mock examination</span><h2>KRIES Paper 1</h2></div><div><small>Time remaining</small><div class="time">—</div></div></div><div class="examgrid"><section class="card"><div class="row"><span class="eyebrow">Question '+(i+1)+' of 100</span><span class="tag">'+esc(catalog.exam.topics[q.topic][0])+'</span></div><div class="question">'+esc(q.prompt)+'</div>'+q.options.map((v,k)=>'<button class="choice" data-act="answer/'+k+'" aria-pressed="'+(a.answers[i]===k)+'"><span>'+String.fromCharCode(65+k)+'</span>'+esc(v)+'</button>').join('')+'<div class="actions">'+button(a.flags.includes(i)?'Unmark review':'Mark for review','flag','light')+button('Clear answer','clear','ghost')+'</div><div class="row actions">'+(i>0?button('← Previous','go/'+(i-1),'light'):'<span></span>')+(i<99?button('Next question →','go/'+(i+1)):button('Submit test','confirm'))+'</div><div class="note" id="status" role="status"></div></section><aside class="card"><h2>Question palette</h2><p class="muted">'+n+' answered · '+(100-n)+' remaining · '+a.flags.length+' flagged</p><div class="palette">'+a.questions.map((_,k)=>'<button aria-label="Question '+(k+1)+(k in a.answers?', answered':'')+(a.flags.includes(k)?', marked for review':'')+'" class="'+(k in a.answers?'answered ':'')+(k===i?'here ':'')+(a.flags.includes(k)?'marked':'')+'" data-act="go/'+k+'">'+(k+1)+'</button>').join('')+'</div><div class="actions">'+button('Submit test','confirm','light')+button('Retry save','save','ghost')+button('Save & exit','exit','ghost')+'</div></aside></div>';
+ const a=attempt,i=a.position,q=a.questions[i];
+ app.innerHTML='<div class="row exam-bar"><div><span class="eyebrow">Mock examination</span><h2>KRIES Paper 1</h2></div><div class="clock"><small>Time remaining</small><div class="time">—</div></div>'+button('Questions','palette','light palette-trigger')+'</div><div class="examgrid"><section class="card question-card"><div class="row"><span class="eyebrow">Question '+(i+1)+' of 100</span><span class="tag">'+esc(catalog.exam.topics[q.topic][0])+'</span></div><div class="question" tabindex="-1">'+esc(q.prompt)+'</div>'+q.options.map((v,k)=>'<button class="choice" data-act="answer/'+k+'" aria-pressed="'+(a.answers[i]===k)+'"><span>'+String.fromCharCode(65+k)+'</span>'+esc(v)+'</button>').join('')+'<div class="actions">'+button(a.flags.includes(i)?'Unmark review':'Mark for review','flag','light')+button('Clear answer','clear','ghost')+'</div><div class="row actions">'+(i>0?button('← Previous','go/'+(i-1),'light'):'<span></span>')+(i<99?button('Next question →','go/'+(i+1)):button('Submit test','confirm'))+'</div><div class="note" id="status" role="status"></div></section><aside class="card"><h2>Question palette</h2>'+paletteContent(a)+'</aside></div>';
  tick();
 }
 function result(){
@@ -70,16 +84,19 @@ document.addEventListener('click',async e=>{
  if(act==='logout'){await saves;await api('auth/logout',{});showAuth();return}
  if(act==='close')return modal.close();if(act==='instructions')return instructions();
  if(act==='home')return await home();
- if(act==='start'||act==='open'){b.disabled=true;const a=act==='start'?await api('start',{}):await api('attempt/'+arg);modal.close();loadAttempt(a);return}
+ if(act==='start'||act==='open'){b.disabled=true;const a=act==='start'?await api('start',{}):await api('attempt/'+arg);modal.close();loadAttempt(a);window.scrollTo(0,0);return}
  if(!attempt||submitting)return;
- if(act==='confirm'){modal.innerHTML='<h2>Submit this paper?</h2><p>You have answered '+Object.keys(attempt.answers).length+' of 100 questions and flagged '+attempt.flags.length+' for review.</p><div class="actions">'+button('Submit & view score','submit')+button('Keep working','close','light')+'</div>';modal.showModal();return}
+ if(act==='palette')return showPalette();
+ if(act==='confirm'){if(modal.open)modal.close();modal.innerHTML='<h2>Submit this paper?</h2><p>You have answered '+Object.keys(attempt.answers).length+' of 100 questions and flagged '+attempt.flags.length+' for review.</p><div class="actions">'+button('Submit & view score','submit')+button('Keep working','close','light')+'</div>';modal.showModal();return}
  if(act==='submit'){submitting=true;b.disabled=true;await saves;const a=attempt;const r=await api('attempt/'+a.id+'/submit',{revision:a.revision,answers:a.answers,flags:a.flags,position:a.position});modal.close();loadAttempt(r);return}
- if(act==='exit'){await save();if(!saveFailed)await home();return}
- if(act==='go')attempt.position=Number(arg);
+ if(act==='exit'){await save();if(!saveFailed){modal.close();await home()}return}
+ if(act==='save' && modal.open){modal.close()}
+ if(act==='go'){modal.close();attempt.position=Number(arg)}
  if(act==='answer')attempt.answers[attempt.position]=Number(arg);
  if(act==='clear')delete attempt.answers[attempt.position];
  if(act==='flag'){const i=attempt.position;attempt.flags=attempt.flags.includes(i)?attempt.flags.filter(k=>k!==i):[...attempt.flags,i]}
  examView();save();
+ if(act==='go'&&matchMedia('(max-width: 850px)').matches){const question=document.querySelector('.question');question.focus({preventScroll:true});question.scrollIntoView({block:'start'})}
  }catch(err){submitting=false;b.disabled=false;alertBox(err.message)}
 });
 home().catch(e=>{if(e.message!=='Sign in required'){app.innerHTML='<div class="card"><h2>Practice desk unavailable</h2><p>'+esc(e.message)+'</p>'+button('Retry','home')+'</div>'}});

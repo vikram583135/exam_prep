@@ -3,3 +3,74 @@ button,.btn{font:600 14px/1.3 inherit;font-family:inherit;font-weight:600;font-s
 
 
 .auth-layout{display:grid;grid-template-columns:1.15fr 1fr;gap:clamp(24px,6vw,80px);align-items:center;padding:48px 0}.auth-intro h1{font:normal clamp(42px,6vw,72px)/1.04 Georgia,serif;letter-spacing:-2px;margin:18px 0}.auth-intro p{max-width:380px}.auth-form{max-width:440px;width:100%}.auth-form label{display:grid;gap:6px;margin:14px 0;font-weight:600}.auth-form input{font:inherit;border:1px solid #acbcac;border-radius:7px;padding:11px;background:white;color:#173a32}.auth-form .note:empty{display:none}.auth-form button[type=submit]{width:100%;margin-top:12px}.auth-form p:last-child{margin-bottom:0}.student button{font-size:13px}@media(max-width:700px){.auth-layout{grid-template-columns:1fr;padding:8px 0}.auth-intro h1{font-size:38px}.auth-form{max-width:none}.student span{display:none}}
+/* Keep long account names, answers and subject labels inside their columns. */
+.card, .auth-form label, .grid > *, .examgrid > *, .auth-layout > * { min-width: 0; }
+.student { min-width: 0; }
+.student span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.brand, .student button, .choice span { flex-shrink: 0; }
+.auth-form input { width: 100%; min-width: 0; font-size: 16px; }
+.question, .choice, .tag, .review p, .note { overflow-wrap: anywhere; }
+.palette-trigger { display: none; }
+dialog { max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; }
+
+@media (max-width: 850px) {
+  header, main, footer { width: min(94%, 720px); }
+  .exam-bar {
+    position: sticky; top: 0; z-index: 2; flex-wrap: nowrap; gap: 8px;
+    padding: 10px 0; background: #f6f6ef; border-bottom: 1px solid #cdd6cc;
+  }
+  .exam-bar > :first-child { flex: 1; }
+  .exam-bar .eyebrow { display: none; }
+  .exam-bar h2 { margin: 0; font-size: clamp(18px, 4vw, 26px); }
+  .clock { text-align: right; }
+  .clock small { display: block; font-size: 11px; line-height: 1.2; }
+  .time { font-size: 17px; font-variant-numeric: tabular-nums; }
+  button, .review summary, .card summary { min-height: 44px; touch-action: manipulation; }
+  .palette-trigger { display: inline-block; padding: 8px 12px; }
+  .examgrid { display: block; margin-top: 12px; }
+  .examgrid aside { display: none; }
+  .question { scroll-margin-top: 80px; }
+  .choice { padding: 12px; line-height: 1.5; font-size: 16px; }
+  .choice span { align-self: flex-start; }
+  .question-sheet[open] {
+    display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto;
+    width: min(95vw, 560px); max-width: none; max-height: min(85dvh, 700px);
+    border-radius: 16px; overflow: hidden; padding: 18px;
+  }
+  .sheet-heading h2, .question-sheet p { margin: 0; }
+  .question-sheet p { padding: 8px 0; }
+  .question-sheet .palette {
+    grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+    overflow-y: auto; padding: 4px; overscroll-behavior: contain;
+  }
+  .question-sheet .actions { margin-top: 10px; gap: 5px; }
+  .question-sheet .actions button { padding-inline: 9px; }
+}
+@media (max-width: 540px) {
+  header, main, footer { width: calc(100% - 24px); }
+  header { height: 60px; }
+  main { padding: 16px 0 24px; }
+  .card { padding: 16px; }
+  .auth-layout { gap: 16px; }
+  .auth-intro {
+    background: #153e33; color: #fffef5; border-radius: 14px; padding: 18px;
+  }
+  .auth-intro h1 { font-size: 34px; margin: 8px 0; }
+  .auth-intro p { margin: 0 0 12px; }
+  .facts { column-gap: 12px; row-gap: 4px; }
+  .facts > span { white-space: nowrap; }
+  .hero button { width: 100%; }
+  .question-card .tag { border-radius: 7px; }
+  .question-card .question { font-size: 17px; margin: 16px 0; }
+  .question-card .row.actions { flex-wrap: nowrap; }
+  .question-card .row.actions button { padding-inline: 12px; }
+  .score { font-size: clamp(40px, 12vw, 60px); }
+  .score small { font-size: .57em; }
+  .stat { min-width: 0; padding: 10px 6px; font-size: 12px; text-align: center; }
+  dialog { padding: 18px; width: calc(100% - 24px); max-width: none; }
+  dialog ul { padding-inline-start: 20px; }
+  footer { flex-wrap: wrap; gap: 4px 16px; }
+}
+@media (max-height: 420px) and (max-width: 850px) {
+  .question-sheet[open] { max-height: calc(100dvh - 12px); padding: 10px 16px; }
+}
