@@ -1,0 +1,13 @@
+dist/
+.practice/
+*.env
+.env*
+*.draft.json
+
+
+.wrangler/
+wrangler.jsonc
+.dev.vars*
+*.dpapi
+*.sqlite*
+.openai/

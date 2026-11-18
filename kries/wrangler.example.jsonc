@@ -1,0 +1,13 @@
+{
+  "name": "kries-practice",
+  "main": "dist/server/index.js",
+  "compatibility_date": "2026-11-18",
+  "workers_dev": true,
+  "build": { "command": "node build.mjs" },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "kries-practice",
+    "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+    "migrations_dir": "drizzle"
+  }]
+}
